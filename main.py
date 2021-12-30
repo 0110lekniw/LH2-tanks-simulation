@@ -22,7 +22,10 @@ conductive_heat = calculateConductiveHeat(area=tank[1], conductivity_coefficient
                                           thickness=insulation_thickness, hot_surface_temperature=airProfile[0, 0],
                                           cold_surface_temperature=hydrogenData[2])
 heat = calculateHeat(conductive_heat=conductive_heat, time_step=time_steps[1])
-tank_change = calculateTankChange(heat=heat, energy_derivative=hydrogenData[-1], total_volume=hydrogenData[4], )
+tank_change = calculateTankChange(heat=heat, energy_derivative=hydrogenData[-1], total_volume=hydrogenData[4],
+                                  total_engine_flow=changes[1, 2], vaporization_heat=hydrogenData[3],
+                                  density_star=hydrogenData[-4], vented_pressure=configuration["pressure_vent"],
+                                  tank_pressure=configuration["pressure_tank"])
 
 
 print(heat)

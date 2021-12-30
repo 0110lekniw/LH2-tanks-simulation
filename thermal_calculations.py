@@ -18,14 +18,20 @@ def calculateTankChange(heat=0, energy_derivative=0, total_volume=0, total_engin
     if tank_pressure == vented_pressure:
         x = Symbol('x')
         pressure_change = 0
-        vented_flow = nsolve(
-            heat - (total_engine_flow + x) * vaporization_heat * (x / (total_engine_flow + x) + density_star), x, 0)
+        if total_engine_flow == 0:
+            vented_flow = heat / (vaporization_heat * (1 + density_star))
+        else:
+            vented_flow = nsolve(
+                heat - (total_engine_flow + x) * vaporization_heat * (x / (total_engine_flow + x) + density_star), x, 0)
     else:
         pressure_change = energy_derivative / total_volume * (
                     heat - total_engine_flow * vaporization_heat * density_star)
         if tank_pressure + pressure_change < vented_pressure:
             vented_flow = 0
         else:
+            pressure_change = vented_pressure - tank_pressure
+            if total_engine_flow == 0:
+
             x = Symbol('x')
             vented_flow = nsolve(energy_derivative / total_volume *
                                  (heat - (total_engine_flow + x) * vaporization_heat *
