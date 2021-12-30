@@ -38,7 +38,13 @@ def importData(option):
                                      [1, 20.950, 7.324, 0.392, 1.056, False]  # Aft Tank
                                      ]),
                 "sum_volumes": 2 * 2.602 + 2 * 5.236 + 7.324,  # m3
-                "tanks_names": array(["Front", "Wing", "Aft"])
+                "tanks_names": array(["Front", "Wing", "Aft"]),
+                "insulation_data": array([[20.9, 35],    # Corafoam Pb35
+                                         [11.8, 150],    # Spaceloft
+                                         [18, 50],       # MLI Mylar + Polynet 20 layers
+                                         [32.3, 118],    # Foamglass
+                                         [22.6, 37],     # BX-265
+                                         [26, 67]])      # Glass bubble type k1
             }
             return data
         case "alternate_configuration":
