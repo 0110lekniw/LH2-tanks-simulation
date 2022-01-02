@@ -5,6 +5,8 @@ from numpy import array, zeros
 
 
 def calculateEnergyDerivative(density, pressure_tank):
+    if density < 0:
+        density = cp.PropsSI("D", "P", pressure_tank, "Q", 1, "hydrogen")
     energy_derivative = -0.053 * log(density, e) + 0.2791 - (138000 - pressure_tank) / (25 * 138000)
     return energy_derivative
 # calculation of the pure liquid and pure gas properties using CoolProp library - Helmholtz Energy EoS based on pressure
@@ -35,7 +37,7 @@ def calculateMixtureProperties(liquid_properties = zeros([5]), vapor_properties=
     quality = vapor_properties[-1]/(liquid_properties[-1] + vapor_properties[-1])
     returned_properties = np.empty(liquid_properties.shape[0]+1)
     returned_properties[-3:-1] = liquid_properties[-2:] + vapor_properties[-2:]
-    returned_properties[-4] = - liquid_properties[-4] + vapor_properties[-4]  # vaporization heat
+    returned_properties[3] = - liquid_properties[3] + vapor_properties[3]  # vaporization heat
     returned_properties[-1] = vapor_properties[1]/(vapor_properties[1]+liquid_properties[1])  # density star
     for element in range(returned_properties.shape[0]-4):
         returned_properties[element] = quality*vapor_properties[element] + (1-quality)*liquid_properties[element]
@@ -49,5 +51,5 @@ def calculateHydrogen(pressure, volume_tot, fill_level):
                                             volume=volume_tot * (1 - fill_level),
                                             vapor=True, fluid="hydrogen")
     hydrogen_mixture = calculateMixtureProperties(hydrogen_liquid, hydrogen_gas)
-    return np.hstack([hydrogen_mixture, hydrogen_liquid[-1], hydrogen_gas[-1],
+    return np.hstack([hydrogen_mixture, hydrogen_liquid[-1], hydrogen_liquid[1], hydrogen_gas[-1], hydrogen_gas[1],
                       calculateEnergyDerivative(hydrogen_mixture[1], hydrogen_mixture[0])])
