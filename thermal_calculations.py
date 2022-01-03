@@ -8,7 +8,7 @@ def findQuadraticRoots(a, b, c):
         second_root = (-b+delta**(1/2))/(2*a)
         return [first_root, second_root]
     elif delta == 0:
-        root = first_root = (-b)/(2*a)
+        root = (-b)/(2*a)
         return root
     else:
         print("No Real Roots")
