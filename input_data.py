@@ -2,14 +2,17 @@ from numpy import array
 
 data_options = ["main_configuration", "alternate_configuration"]
 
+
 def importConfiguration():
     # Configuration of the tanks
     configuration = {"pressure_tank": 120000,  # Pa
                      "pressure_vent": 120000,  # Pa
                      "lh2_fill_0": 0.97,  # Initial ratio of liquid hydrogen volume to total volume
-                     "reserve rate": 0.05, # amount of fuel needed at the end of the flight
+                     "reserve rate": 0.05,  # amount of fuel needed at the end of the flight
                      "reserve deviation": 0}
     return configuration
+
+
 # define initial data
 
 def importData(option):
@@ -39,12 +42,12 @@ def importData(option):
                                      ]),
                 "sum_volumes": 2 * 2.602 + 2 * 5.236 + 7.324,  # m3
                 "tanks_names": array(["Front", "Wing", "Aft"]),
-                "insulation_data": array([[20.9, 35],    # Corafoam Pb35
-                                         [11.8, 150],    # Spaceloft
-                                         [18, 50],       # MLI Mylar + Polynet 20 layers
-                                         [32.3, 118],    # Foamglass
-                                         [22.6, 37],     # BX-265
-                                         [26, 67]])      # Glass bubble type k1
+                "insulation_data": array([[20.9, 35],  # Corafoam Pb35
+                                          [11.8, 150],  # Spaceloft
+                                          [18, 50],  # MLI Mylar + Polynet 20 layers
+                                          [32.3, 118],  # Foamglass
+                                          [22.6, 37],  # BX-265
+                                          [26, 67]])  # Glass bubble type k1
             }
             return data
         case "alternate_configuration":
@@ -72,8 +75,6 @@ def importData(option):
             return data
 
 
-
-
 # physical constants
 physical_constants = array([5.68 * 10 ** (-8),  # Steffan-Boltzmann
                             0.95,  # Radiation Emittance
@@ -85,4 +86,3 @@ coefficient_material = [11314.56, -30824.32, 34964.24, -21141.43, 7187.43, -1302
 density_insulation = 20.2  # kg/m3nt
 
 conductivity_insulation = 0.020
-
