@@ -18,7 +18,7 @@ airProfile = defineAirProfile(profile)
 # calculate evaporation of the liquid hydrogen in tanks and vented hydrogen flow for each of the tanks
 tanks_changes = {}
 # load profile indicates the percentage of demanded fuel flow from each of the tanks.
-# For first option this value is proportional to tanks volume to total tanks volume ratio
+# For first option this value is proportional to tanks volume to total tanks' volume ratio
 load_profile = np.zeros((time_steps.shape[0], data["tanks_data"].shape[0]))
 for tank in range(data["tanks_data"].shape[0]):
     insulation = np.hstack((data["insulation_data"][0], insulation_thickness))
