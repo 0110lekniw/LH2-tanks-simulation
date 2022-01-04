@@ -7,7 +7,7 @@ from thermal_calculations import calculateConductiveHeat, calculateHeat, calcula
 def simulateTank(time_steps = np.zeros((3)), configuration = np.zeros((3)), tank_data = np.zeros((3)),
                  mission_data = np.zeros((3, 3)), air_data = np.zeros((3, 3)), load_profile = np.zeros((5)),
                  insulation_data = np.zeros(3)):
-    results = np.zeros(time_steps.shape[0], 3)
+    results = np.zeros((time_steps.shape[0], 3))
     results[0, :] = [configuration["pressure_tank"], 0 , configuration["lh2_fill_0"]]
     # values constant during the iterations:
     # geometrical tank data
