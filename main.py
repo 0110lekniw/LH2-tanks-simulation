@@ -21,9 +21,10 @@ tanks_changes = {}
 # For first option this value is proportional to tanks volume to total tanks' volume ratio
 load_profile = np.zeros((time_steps.shape[0], data["tanks_data"].shape[0]))
 for tank in range(data["tanks_data"].shape[0]):
-    insulation = np.hstack((data["insulation_data"][0], insulation_thickness))
+    insulation = np.hstack((data["insulation_data"][0], data["tanks_data"][tank][-1]))
     load_profile[:, tank] = -data["tanks_data"][tank][2]/data["sum_volumes"]
     tanks_changes[tank] = simulateTank(time_steps=time_steps, configuration=configuration,
-                                       tank_data=data["tanks_data"][tank], mission_data=changes,
-                                       air_data=airProfile, load_profile=load_profile[:, tank], insulation_data=insulation)
+                                       tank_data=data["tanks_data"][tank][:-2], mission_data=changes,
+                                       air_data=airProfile, load_profile=load_profile[:, tank],
+                                       insulation_data=insulation)
 print(tanks_changes)

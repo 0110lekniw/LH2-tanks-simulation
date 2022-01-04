@@ -5,8 +5,8 @@ data_options = ["main_configuration", "alternate_configuration"]
 
 def importConfiguration():
     # Configuration of the tanks
-    configuration = {"pressure_tank": 120000,  # Pa
-                     "pressure_vent": 120000,  # Pa
+    configuration = {"pressure_tank": 100000,  # Pa
+                     "pressure_vent": 138000,  # Pa
                      "lh2_fill_0": 0.97,  # Initial ratio of liquid hydrogen volume to total volume
                      "reserve rate": 0.05,  # amount of fuel needed at the end of the flight
                      "reserve deviation": 0}
@@ -36,9 +36,9 @@ def importData(option):
                     [10000, 1500, 58.262, 0.0794, 452.11],  # descent 10000 -> 1500
                     [1500, 1500, 225.000, 0.0568, 1800.00],  # descent 10000 -> 1500
                 ]),  # with external tanks,
-                "tanks_data": array([[2, 11.609, 2.602, 0.465, 1.170, True],  # Front Tank
-                                     [2, 21.992, 5.236, 0.500, 1.000, False],  # Wing Tank
-                                     [1, 20.950, 7.324, 0.392, 1.056, False]  # Aft Tank
+                "tanks_data": array([[2, 11.609, 2.602, 0.465, 1.170, True, 0.10],  # Front Tank
+                                     [2, 21.992, 5.236, 0.500, 1.000, False, 0.065],  # Wing Tank
+                                     [1, 20.950, 7.324, 0.392, 1.056, False, 0.06]  # Aft Tank
                                      ]),
                 "sum_volumes": 2 * 2.602 + 2 * 5.236 + 7.324,  # m3
                 "tanks_names": array(["Front", "Wing", "Aft"]),
