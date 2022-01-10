@@ -7,7 +7,7 @@ from thermal_calculations import calculateConductiveHeat, calculateHeat, calcula
 def simulateTank(time_steps=np.zeros(3), configuration=np.zeros(3), tank_data=np.zeros(3),
                  mission_data=np.zeros((3, 3)), air_data=np.zeros((3, 3)), load_profile=np.zeros(5),
                  insulation_data=np.zeros(3)):
-    results = np.zeros((time_steps.shape[0], 6))
+    results = np.zeros((time_steps.shape[0], 7))
     results[0, :3] = [configuration["pressure_tank"], 0, configuration["lh2_fill_0"]]
     # values constant during the iterations:
     # geometrical tank data
@@ -31,8 +31,15 @@ def simulateTank(time_steps=np.zeros(3), configuration=np.zeros(3), tank_data=np
                                           vaporization_heat=hydrogenData[3], liquid_density=hydrogenData[8],
                                           gas_density=hydrogenData[10], vented_pressure=venting_pressure,
                                           tank_pressure=pressure)
+        if time_step == 0:
+            results[time_step, 4] = results[time_step, 2] * hydrogenData[8] * total_volume
+            results[time_step, 5] = (1 - results[time_step, 2]) * hydrogenData[10] * total_volume
+            results[time_step, 5] = (1 - results[time_step, 2]) * hydrogenData[10] * total_volume
         results[time_step + 1, :3] = results[time_step, :3] + np.multiply(tank_change, [1, 1, -1])
         results[time_step + 1, 3] = fuel_flow
         results[time_step + 1, 4] = results[time_step + 1, 2]*hydrogenData[8]*total_volume
         results[time_step + 1, 5] = (1-results[time_step + 1, 2])*hydrogenData[10]*total_volume
+        results[time_step + 1, 5] = (1-results[time_step + 1, 2])*hydrogenData[10]*total_volume
+        results[time_step + 1, 6] = results[time_step, 6] + (results[time_step+1, 1] - results[time_step, 1]) + \
+                                    (results[time_step+1, 5] - results[time_step, 5])
     return results

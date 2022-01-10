@@ -1,6 +1,20 @@
+import numpy as np
 from numpy import array
 
 data_options = ["main_configuration", "alternate_configuration"]
+
+
+def defineTankData(order=array(["Wing", "Front", "Aft"])):
+    tanks = {
+        "Front": array([2, 11.609, 2.602, 0.465, 1.170, True, 0.10]),  # Front Tank
+        "Wing": array([2, 21.992, 5.236, 0.500, 1.000, False, 0.065]),  # Wing Tank
+        "Aft": array([1, 20.950, 7.324, 0.392, 1.056, False, 0.06]),  # Aft Tank
+    }
+    returned_data = tanks[order[0]]
+    if order.shape[0] > 1:
+        for tank in range(order.shape[0]-1):
+            returned_data = np.vstack((returned_data, tanks[order[tank+1]]))
+    return returned_data
 
 
 def importConfiguration():
@@ -15,12 +29,13 @@ def importConfiguration():
 
 # define initial data
 
-def importData(option):
+def importData(option, order):
     # Missions Definition [H0    ,H-1   ,engine  ,apu    ,time   ]
     #                     [ft    ,ft    ,kg      ,kg/s   ,s      ]
 
     # Tanks Definition                [No.   ,area   ,volume  ,semi_axis   ,Outer/Inner, Cargo]
     #                                 [-     ,m2     ,m3      ,m           ,-          , Bool ]
+    tanks_data = defineTankData(order=order)
     match option:
         case "main_configuration":
             data = {
@@ -36,11 +51,8 @@ def importData(option):
                     [10000, 1500, 58.262, 0.0794, 452.11],  # descent 10000 -> 1500
                     [1500, 1500, 225.000, 0.0568, 1800.00],  # descent 10000 -> 1500
                 ]),  # with external tanks,
-                "tanks_data": array([[2, 11.609, 2.602, 0.465, 1.170, True, 0.10],  # Front Tank
-                                     [2, 21.992, 5.236, 0.500, 1.000, False, 0.065],  # Wing Tank
-                                     [1, 20.950, 7.324, 0.392, 1.056, False, 0.06]  # Aft Tank
-                                     ]),
-                "sum_volumes": 2 * 2.602 + 2 * 5.236 + 7.324,  # m3
+                "tanks_data": tanks_data,
+                "sum_volumes": array([2 * 2.602 + 2 * 5.236 + 7.324, ]),  # m3
                 "tanks_names": array(["Front", "Wing", "Aft"]),
                 "insulation_data": array([[20.9, 35],  # Corafoam Pb35
                                           [11.8, 150],  # Spaceloft
