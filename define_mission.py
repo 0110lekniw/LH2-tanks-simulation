@@ -18,7 +18,7 @@ def calculateChanges(mission_data, include_apu_flow = False, dt = 10):
         mission_properties = np.vstack((mission_properties, steps))
     if not include_apu_flow:
         mission_properties = np.delete(mission_properties, -1, 1)
-    return mission_properties
+    return np.multiply(mission_properties, np.array([1, 1, -1]))
 
 
 def defineProfile(changes, deviation_reserves, rate_reserve, evaporation):

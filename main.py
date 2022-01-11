@@ -5,23 +5,27 @@ import pandas as pd
 from numpy import array
 
 # import data
-orders = {1: array(["Wing", "Front", "Aft"]),
-          2: array(["Front", "Wing", "Aft"]),
-          3: array(["Front", "Aft", "Wing"]),
-          4: array(["Aft", "Front", "Wing"]),
-          5: array(["Aft", "Wing", "Front"]),
-          6: array(["Wing", "Aft", "Front"])
-          }
+orders = array([["Wing", "Front", "Aft"],
+          ["Front", "Wing", "Aft"],
+          ["Front", "Aft", "Wing"],
+          ["Aft", "Front", "Wing"],
+          ["Aft", "Wing", "Front"],
+          ["Wing", "Aft", "Front"]])
+
+venting_pressure = array([120000, 130000, 140000, 150000, 160000, 170000, 180000, 200000])
 option = data_options[0]
-data = importData(option, order = orders[4])
-configuration = importConfiguration()
-for key in data.keys():
-    df = pd.DataFrame(data = data[key])
-    filepath = "Configuration " + str(option) + " Input" + key + file_date("Configuration " + str(option)) + '.xlsx'
-    df.to_excel(filepath, sheet_name=key)
-for insulation in data["insulation_data"]:
+for order in range(orders.shape[0]):
+    data = importData(option, order = orders[order])
+    configuration = importConfiguration()
+    print(orders[order])
+    for key in data.keys():
+        df = pd.DataFrame(data = data[key])
+        filepath = "Configuration " + str(option) + " Input" + key+"_O_"+str(order) +"_"+ file_date("Configuration " +
+                                                                                                 str(option)) + '.xlsx'
+        df.to_excel(filepath, sheet_name=key)
+
     results = calculateMaximumCruiseDuration(data = data, configuration = configuration, simultaneous=False,
-                                             insulation_data=insulation)
+                                             insulation_data=data["insulation_data"][0])
     # the results consist of four arrays:
     # first is the mission profile consisting of three columns [time, altitude, engine fuel flow] and if included apu flow
     # second is the air profile containing air: pressure, temperature and density
@@ -36,10 +40,10 @@ for insulation in data["insulation_data"]:
                                                                     "Engine Flow", "Liquid Hydrogen Mass",
                                                                     "Gas Hydrogen Mass", "Evaporated Hydrogen"])
                 ## save to xlsx file
-                filepath = "C_" + str(option) + " _T_" + str(data["tanks_names"][tank]) +"_I_"+insulation[0]+ " " + \
+                filepath = "C_" + str(option) + " _T_" + str(data["tanks_names"][tank]) +"_O_"+str(order)+ "_" + \
                            file_date("Configuration " + str(option)) + '.xlsx'
                 df.to_excel(filepath, sheet_name=data["tanks_names"][tank])
         else:
             df = pd.DataFrame(data=results[key])
-            filepath = "Configuration " + str(option) + " " + key+"_I_"+insulation[0] + file_date("Configuration " + str(option)) + '.xlsx'
+            filepath = "Configuration " + str(option) + " " + key+"_O_"+str(order)+ "_" + file_date("Configuration " + str(option)) + '.xlsx'
             df.to_excel(filepath, sheet_name=key)
