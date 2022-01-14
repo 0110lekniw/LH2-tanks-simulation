@@ -56,7 +56,15 @@ def calculateMaximumCruiseDuration(data, configuration, simultaneous=True, insul
                   round(final_fuel / initial_fuel * 100, 2)
                   , "% of initial fuel")
     else:
-        while round(final_fuel / initial_fuel, 4) != configuration["reserve rate"]:
+        iteration_number = 0
+        previous_lacking_fuel = 0
+        previous_ratio = 0
+        accuracy = 0
+        difference_between_fuels = 0
+        best_value_obtained = 0
+        best_ratio_obtained = 0
+        theLast = False
+        while round(final_fuel / initial_fuel, 4-accuracy) != configuration["reserve rate"]:
             # initiation  - calculate fuel demand and altitude in time
             number_of_sequences = data["tanks_data"].shape[0]
             changes = calculateChanges(mission_profile, False, dt=10)
@@ -99,9 +107,13 @@ def calculateMaximumCruiseDuration(data, configuration, simultaneous=True, insul
                             bool = load_profile[:, tank] > 0
                             b_where = np.where(bool)
                             last_load_index = np.max(b_where)
-                            last_fuel_flow = changes[last_load_index, 2]/changes[last_load_index, 0]
+                            if changes[last_load_index, 2] != 0:
+                                last_fuel_flow = changes[last_load_index, 2]/changes[last_load_index, 0]
                             lacking_time = lacking_fuel/last_fuel_flow
-                            shut_off_time[tank, 1] += lacking_time
+                            if shut_off_time[tank, 1] + lacking_time < 1800:
+                                shut_off_time[tank, 1] = 1810
+                            else:
+                                shut_off_time[tank, 1] += lacking_time
                             shut_off_time[tank+1, 0] = shut_off_time[tank, 1]
                         else:
                             break
@@ -124,15 +136,40 @@ def calculateMaximumCruiseDuration(data, configuration, simultaneous=True, insul
                     final_fuel += tanks_changes[tank][-1, 4]*number_of_tanks
                     initial_fuel += tanks_changes[tank][1, 4]*number_of_tanks
             fuel_demand = (mission_profile[6, 2] / mission_profile[6, -1])
-            negative_time = round(
-                (initial_fuel * configuration["reserve rate"] + configuration["reserve deviation"] - final_fuel)
-                / fuel_demand, 1)
-            mission_profile[6, -1] -= negative_time
-            mission_profile[6, 2] = fuel_demand * mission_profile[6, -1]
+            vented_fuel = 0
+            lacking_fuel = initial_fuel * configuration["reserve rate"] + configuration["reserve deviation"] - final_fuel
+            print("Iteration " + str(iteration_number) + " finished. Final Fuel is:", final_fuel, 'whats equal to:',
+                  round(final_fuel / initial_fuel * 100, 2), "% of initial fuel. Lacking fuel is equal to: ", lacking_fuel)
+            if theLast:
+                break
+            fuel_ratio = final_fuel/initial_fuel
+            if iteration_number == 0 or abs(configuration["reserve rate"] - fuel_ratio) < abs(configuration["reserve rate"] - best_ratio_obtained):
+                best_ratio_obtained = fuel_ratio
+                best_value_obtained = mission_profile[6, 2] + lacking_fuel
+                print("New best ratio of: ", best_ratio_obtained*100, "%")
+            if round((abs(previous_lacking_fuel - lacking_fuel) - difference_between_fuels),0) == 0:
+                print("no change")
+                lacking_fuel = (previous_lacking_fuel + lacking_fuel)/2
+            if previous_ratio<configuration["reserve rate"]< fuel_ratio or previous_ratio>configuration["reserve rate"]>fuel_ratio:
+                if (abs(previous_ratio) + abs(fuel_ratio))*100 < 10:
+                    lacking_fuel = (previous_lacking_fuel + lacking_fuel)/2
+                    print("Finding value between obtained. New Lacking fuel is: ",lacking_fuel)
+            if iteration_number == 9:
+                print("decreasing accuracy to 0.1%")
+                accuracy = 1
+            mission_profile[6, 2] -= lacking_fuel
+            if iteration_number == 19:
+                print("Iteration limit obtained")
+                mission_profile[6, 2] = best_value_obtained
+                theLast = True
+            difference_between_fuels = abs(previous_lacking_fuel - lacking_fuel)
+            print(difference_between_fuels)
+            previous_lacking_fuel = lacking_fuel
+            previous_ratio = fuel_ratio
+            mission_profile[6, -1] = mission_profile[6, 2]/fuel_demand
+            iteration_number += 1
 
-            print("Iteration finished. Final Fuel is:", final_fuel, 'whats equal to:',
-                  round(final_fuel / initial_fuel * 100, 2)
-                  , "% of initial fuel")
+
     results = {"mission_profile": profile, "air_profile": air_profile, "tank_properties": tanks_changes,
                    "mission_data": mission_profile}
 
@@ -164,40 +201,3 @@ def defineLoadProfile(profile = np.zeros((2, 3)), start_time = 0, end_time = 1, 
             break
     loadProfile[starting_index+1:ending_index] = load
     return loadProfile
-
-
-
-def calculateNewChanges(changes, profile, shut_off_time):
-    before_changes = changes[:shut_off_time[1] - 1, :]
-    to_separate = changes[shut_off_time[1], :]
-    additional_time = shut_off_time[0] - profile[shut_off_time[1] - 1, 0]
-    new_rows = np.array([[additional_time,
-                          to_separate[1] * additional_time / to_separate[0],
-                          to_separate[2] * additional_time / to_separate[0]],
-                         [to_separate[0] - additional_time,
-                          to_separate[1] * (to_separate[0] - additional_time) / to_separate[0],
-                          to_separate[2] * (to_separate[0] - additional_time) / to_separate[0]]])
-    after_changes = changes[shut_off_time[1]:, :]
-    changes = np.vstack([before_changes, new_rows, after_changes])
-    return changes
-
-
-def calculateShutOffTime(changes, initial_index, configuration, initial_shut_off_time=0, tank_mass=100,
-                         vented_gas=np.zeros([10])):
-    required_reserves = tank_mass * configuration["reserve rate"] + configuration["reserve deviation"]
-    shut_off_time = initial_shut_off_time
-    left_mass_sum = tank_mass - np.sum(vented_gas[:initial_index])
-    for index in range(initial_index, changes.shape[0]):
-        required_fuel = required_reserves + (vented_gas[-1] - vented_gas[index])
-        if left_mass_sum - changes[index, 2] < required_fuel:
-            fuel_demand = changes[index, 2] / changes[index, 0]
-            shut_off_time += (left_mass_sum - required_fuel) / fuel_demand
-            break
-        elif index == changes.shape[0]:
-            index = changes.shape[0] - 1
-            shut_off_time = np.sum(changes[:, 0])
-        else:
-            left_mass_sum -= (changes[index, 2] + vented_gas[index])
-            shut_off_time += changes[index, 0]
-            index += 1
-    return [shut_off_time, index]

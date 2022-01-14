@@ -34,7 +34,7 @@ def defineProfile(changes, deviation_reserves, rate_reserve, evaporation):
             profile[row, :1] = changes[row, :1]
         else:
             profile[row, :] = profile[row - 1, :] + changes[row, :]
-    return profile
+    return np.multiply(profile, np.array([1, 1, -1]))
 
 
 def defineAirProfile(profile):

@@ -7,7 +7,7 @@ data_options = ["main_configuration", "alternate_configuration"]
 def defineTankData(order=array(["Wing", "Front", "Aft"])):
     tanks = {
         "Front": array([2, 11.609, 2.602, 0.465, 1.170, True, 0.10]),  # Front Tank
-        "Wing": array([2, 21.992, 5.236, 0.500, 1.000, False, 0.065]),  # Wing Tank
+        "Wing": array([2, 21.757, 6.042, 0.500, 1.000, False, 0.065]),  # Wing Tank
         "Aft": array([1, 20.950, 7.324, 0.392, 1.056, False, 0.06]),  # Aft Tank
     }
     returned_data = tanks[order[0]]
@@ -35,9 +35,10 @@ def importData(option, order):
 
     # Tanks Definition                [No.   ,area   ,volume  ,semi_axis   ,Outer/Inner, Cargo]
     #                                 [-     ,m2     ,m3      ,m           ,-          , Bool ]
-    tanks_data = defineTankData(order=order)
+
     match option:
         case "main_configuration":
+            tanks_data = defineTankData(order=order)
             data = {
                 "mission_profile": array([
                     [0, 0, 0, 0.0802, 1800.00],  # taxiing
@@ -52,7 +53,7 @@ def importData(option, order):
                     [1500, 1500, 225.000, 0.0568, 1800.00],  # descent 10000 -> 1500
                 ]),  # with external tanks,
                 "tanks_data": tanks_data,
-                "sum_volumes": array([2 * 2.602 + 2 * 5.236 + 7.324, ]),  # m3
+                "sum_volumes": array([2 * 2.602 + 2 * 6.042 + 7.324, ]),  # m3
                 "tanks_names": array(["Front", "Wing", "Aft"]),
                 "insulation_data": array([[20.9, 35],  # Corafoam Pb35
                                           [11.8, 150],  # Spaceloft
@@ -77,12 +78,18 @@ def importData(option, order):
                     [1500, 1500, 203.000, 0.0568, 1800.00],  # descent 10000 -> 1500
                 ]),  # without external tanks
                 "tanks_data": array([
-                    [1, 37.620, 19.425, 0.666, 1.073, False],  # Front Tank
-                    [1, 16.763, 5.167, 0.347, 1.120, False],  # Aft Tank
+                    [1, 37.620, 19.425, 0.666, 1.073, False, 0.065],  # Front Tank
+                    [1, 16.763, 5.167, 0.347, 1.120, False, 0.065],  # Aft Tank
                 ])
                 ,
-                "sum_volumes": 19.425 + 5.167,  # m3
-                "tanks_names": array(["Front Alternate", "Aft Alternate"])
+                "sum_volumes": array([19.425 + 5.167]),  # m3
+                "tanks_names": array(["Front Alternate", "Aft Alternate"]),
+                "insulation_data": array([[20.9, 35],  # Corafoam Pb35
+                                          [11.8, 150],  # Spaceloft
+                                          [18, 50],  # MLI Mylar + Polynet 20 layers
+                                          [32.3, 118],  # Foamglass
+                                          [22.6, 37],  # BX-265
+                                          [26, 67]])  # Glass bubble type k1
             }
             return data
 
